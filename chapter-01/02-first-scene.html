@@ -5,6 +5,7 @@
 <head>
     <title>Example 01.02 - First Scene</title>
     <script type="text/javascript" src="../libs/three.js"></script>
+    <script type="text/javascript" src="../libs/stats.js"></script>
     <style>
         body {
             /* set margin to 0 and overflow to hidden, to go fullscreen */
@@ -15,6 +16,8 @@
 </head>
 <body>
 
+<div id="Stats-output">
+</div>
 <!-- Div which will hold the Output -->
 <div id="WebGL-output">
 </div>
@@ -24,6 +27,8 @@
 
     // once everything is loaded, we run our Three.js stuff.
     function init() {
+
+        var stats = initStats();
 
         // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
@@ -35,6 +40,7 @@
         var renderer = new THREE.WebGLRenderer();
         renderer.setClearColor(new THREE.Color(0xEEEEEE));
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
 
         // show axes in the screen
         var axes = new THREE.AxisHelper(20);
@@ -42,7 +48,7 @@
 
         // create the ground plane
         var planeGeometry = new THREE.PlaneGeometry(60, 20);
-        var planeMaterial = new THREE.MeshBasicMaterial({color: 0xcccccc});
+        var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
         var plane = new THREE.Mesh(planeGeometry, planeMaterial);
 
         // rotate and position the plane
@@ -50,32 +56,35 @@
         plane.position.x = 15;
         plane.position.y = 0;
         plane.position.z = 0;
+        plane.receiveShadow = true;
 
         // add the plane to the scene
         scene.add(plane);
 
         // create a cube
         var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
-        var cubeMaterial = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true});
+        var cubeMaterial = new THREE.MeshLambertMaterial({color: 0xff0000});
         var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-
+        
         // position the cube
         cube.position.x = -4;
         cube.position.y = 3;
         cube.position.z = 0;
+        cube.castShadow = true;
 
         // add the cube to the scene
         scene.add(cube);
 
         // create a sphere
         var sphereGeometry = new THREE.SphereGeometry(4, 20, 20);
-        var sphereMaterial = new THREE.MeshBasicMaterial({color: 0x7777ff, wireframe: true});
+        var sphereMaterial = new THREE.MeshLambertMaterial({color: 0x7777ff});
         var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 
         // position the sphere
         sphere.position.x = 20;
         sphere.position.y = 4;
         sphere.position.z = 2;
+        sphere.castShadow = true;
 
         // add the sphere to the scene
         scene.add(sphere);
@@ -86,11 +95,39 @@
         camera.position.z = 30;
         camera.lookAt(scene.position);
 
+        //add the spotlight to the scene
+        var spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.position.set(-20,30,-5);
+        spotLight.castShadow = true;
+        scene.add(spotLight);
         // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(renderer.domElement);
+        renderScene();
 
         // render the scene
-        renderer.render(scene, camera);
+        // renderer.render(scene, camera);
+
+        function renderScene() {
+            stats.update();
+            cube.rotation.x += 0.002;
+            cube.rotation.y += 0.002;
+            cube.rotation.z += 0.002;
+            step += 0.04;
+            sphere.position.x = 20 + (10 * (Math.cos(step)));
+            sphere.position.y = 2 + (10 * abs(Math.sin(step)));
+            requestAnimationFrame(renderScene);
+            renderer.render(scene, camera);
+        }
+
+        function initStats() {
+            var stats = new Stats();
+            stats.setMode(0);
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.left = '0px';
+            stats.domElement.style.top = '0px';
+            document.getElementById("Stats-output").appendChild(stats.domElement);
+            return stats;
+        }
     }
     window.onload = init;
 
