@@ -117,6 +117,8 @@
         gui.add(controls, 'rotationSpeed', 0, 0.5);
         gui.add(controls, 'bouncingSpeed', 0, 0.5);
 
+        window.addEventListener('resize', onResize, false);
+
         render();
 
         function render() {
